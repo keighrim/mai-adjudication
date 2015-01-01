@@ -24,8 +24,6 @@ package mai;
 
 import java.io.*;
 import java.util.*;
-
-
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
@@ -34,51 +32,46 @@ import org.xml.sax.helpers.*;
  * calling the XMLHandler file.
  * 
  * @author Amber Stubbs
+ * @revised Keigh Rim
  *
  */
 
 class XMLFileLoader{
-    
-    private XMLHandler xmlfile;
 
-        XMLFileLoader(File f){
-            xmlfile = new XMLHandler();
-            try{
-                readFile(f);
-            }catch(Exception e){
-                System.out.println(e.toString());
-            }
+    private XMLHandler mXmlfile;
+
+    XMLFileLoader(File f){
+        mXmlfile = new XMLHandler();
+        try{
+            readFile(f);
+        }catch(Exception e){
+            e.printStackTrace();
         }
-
-private void readFile(File f) throws Exception{
-
-    try { //this will work with java 5 and 6.  Java 1.4 is not supported.
-
-            XMLReader parser = XMLReaderFactory.createXMLReader();
-            parser.setContentHandler(xmlfile);
-             String docname = f.toString();
-             
-                try{
-                    parser.parse(docname);
-                }catch(Exception ex){
-                        System.out.println(ex.toString());
-                        System.out.println("parse of " + docname + " failed");
-                        throw new Exception();
-                }
-
-    }catch (SAXException e) {
-        System.out.println("e.toString()");
     }
 
-}
+    private void readFile(File f) throws Exception{
 
-  public HashCollection<String,Hashtable<String,String>> getTagHash(){
-      return xmlfile.returnTagHash();
-  }
+        try { //this will work with java 5 and 6.  Java 1.4 is not supported.
+            XMLReader parser = XMLReaderFactory.createXMLReader();
+            parser.setContentHandler(mXmlfile);
+            String docname = f.toString();
+            try{
+                parser.parse(docname);
+            }catch(Exception ex){
+                ex.printStackTrace();
+                System.out.println("parse of " + docname + " failed");
+                throw new Exception();
+            }
+        }catch (SAXException e) {
+            e.printStackTrace();
+        }
+    }
 
-  
-  public String getTextChars(){
-      return xmlfile.getTextChars();
-  }
+    public HashCollection<String,Hashtable<String,String>> getTagHash(){
+        return mXmlfile.returnTagHash();
+    }
 
+    public String getTextChars(){
+        return mXmlfile.getText();
+    }
 }

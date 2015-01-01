@@ -22,171 +22,158 @@
 
 package mai;
 
-import java.util.*;
-
 /**
- * This is an implementation of a Hashtable that 
- * stores more than one value per key.  This is done by 
+ * This is an implementation of a Hashtable that
+ * stores more than one value per key.  This is done by
  * having every key associated with an ArrayList, and every
  * new value being stored in the array is added to the end of
- * the list (unless the list already contains that value)
- * 
+ * @revised Keigh Rim
+ *
  */
+
+import java.util.*;
 
 class HashCollection<K,V>{
 
-	private Hashtable<K,ArrayList<V>> hc;
+    private Hashtable<K,ArrayList<V>> mHash;
 
-	HashCollection(){
-		hc = new Hashtable<K,ArrayList<V>>();
-	}
+    public HashCollection(){
+        mHash = new Hashtable<K,ArrayList<V>>();
+    }
 
-	/**
-	 * Associate yet another value with a key in a Hashtable that allows duplicates.
-	 * Also use to put the first key/value.
-	 *
-	 * @param key Key to lookup by
-	 * @param value yet another associated value for this key.
-	 */
-	void putEnt (K key, V value)
-	{
-		ArrayList<V> existing = getList(key);
-		if ( existing == null ){
-			ArrayList<V> newlist = new ArrayList<V>();
-			newlist.add(value);
-			hc.put(key, newlist);
-		}
-		else {
-			//just add to tail end of existing ArrayList
-			//but only if it's not already there
-			if(!existing.contains(value)){
-				existing.add(value);
-			}
-		}
-	}
+    public HashCollection(Hashtable<K,ArrayList<V>> hash){
+        mHash = hash;
+    }
 
-	public void putAllEnt (K key, V value)
-	{
-		ArrayList<V> existing = getList(key);
-		if ( existing == null ){
-			ArrayList<V> newlist = new ArrayList<V>();
-			newlist.add(value);
-			hc.put(key, newlist);
-		}
-		else {
-			//just add to tail end of existing ArrayList
-			//even if the value is already there
-			existing.add(value);
-		}
-	}
+    /**
+     * Associate yet another value with a key in a Hashtable that allows duplicates.
+     * Also use to put the first key/value.
+     * Add an entity to a key's arrayList
+     *
+     * @param key Hashtable key
+     * @param value value being added to key's array
+     */
+    public void putEnt (K key, V value) {
+        //just add to tail end of existing ArrayList
+        //but only if it's not already there
+        try {
+            getList(key).add(value);
+        } catch (NullPointerException e) {
+            ArrayList<V> newlist = new ArrayList<V>();
+            newlist.add(value);
+            mHash.put(key, newlist);
+        }
+    }
 
-	public Hashtable<V,String> getValueHash(){
-		Hashtable<V,String> values = new Hashtable<V,String>();
-		Iterator<ArrayList<V>> it = hc.values().iterator();
-		while(it.hasNext()){
-			ArrayList<V> a1 = it.next();
-			if(a1!=null){
-				for (int j=0;j<a1.size();j++){
-					if(a1.get(j)!=null){
-						values.put(a1.get(j),"");
-					}
-				}
-			}
-		}
-		return(values);
-	}
+    /* krim: redundant
+    void putAllEnt (K key, V value) {
+        ArrayList<V> existing = getList(key);
+        if ( existing == null ){
+            ArrayList<V> newlist = new ArrayList<V>();
+            newlist.add(value);
+            mHash.put(key, newlist);
+        } else {
+            //just add to tail end of existing ArrayList
+            //even if the value is already there
+            existing.add(value);
+        }
+    }
+    */
 
-	public void printKeys(){
-		for (Enumeration<K> e = hc.keys() ; e.hasMoreElements() ;) {
-			System.out.println(e.nextElement());
-		}
-	}
+    public Hashtable<V,String> getValueHash(){
+        Hashtable<V,String> values = new Hashtable<V,String>();
+        for (ArrayList<V> list : mHash.values()) {
+            if (list != null) {
+                for (V value : list) {
+                    if (value != null) {
+                        values.put(value, "");
+                    }
+                }
+            }
+        }
+        return(values);
+    }
 
-	public ArrayList<K> getKeyList(){
-		ArrayList<K> keys = new ArrayList<K>();
-		for (Enumeration<K> e = hc.keys() ; e.hasMoreElements() ;) {
-			keys.add(e.nextElement());
-		}
-		return(keys);
-	}
+    public void printKeys(){
+        for (Enumeration<K> e = mHash.keys() ; e.hasMoreElements() ;) {
+            System.out.println(e.nextElement());
+        }
+    }
 
-	public void printHash(){
-		for (Enumeration<K> e = hc.keys() ; e.hasMoreElements() ;) {
-			K ent = e.nextElement();
-			System.out.println((String)ent + ":");
-			ArrayList<V> list = getList(ent);
-			for (int i=0;i<list.size();i++){
-				System.out.println("\t" + list.get(i).toString());
-			}
-		}
+    public ArrayList<K> getKeyList(){
+        ArrayList<K> keys = new ArrayList<K>();
+        for (Enumeration<K> e = mHash.keys() ; e.hasMoreElements() ;) {
+            keys.add(e.nextElement());
+        }
+        return(keys);
+    }
 
-	}
+    public void printHash(){
+        for (Enumeration<K> e = mHash.keys() ; e.hasMoreElements() ;) {
+            K ent = e.nextElement();
+            System.out.println(ent + ":");
+            ArrayList<V> list = getList(ent);
+            for (int i=0;i<list.size();i++){
+                System.out.println("\t" + list.get(i).toString());
+            }
+        }
 
-	public void putAll(HashCollection<K,V> h){
-		for (Enumeration<K> e = hc.keys() ; e.hasMoreElements() ;) {
-			K ent = e.nextElement();
-			if (hc.containsKey(ent)){
-				ArrayList<V> vals = h.getList(ent);
-				if(vals !=null){
-					for(int i=0;i<vals.size();i++){
-						putEnt(ent,vals.get(i));
-					}
-				}
-			}
-			else{
-				ArrayList<V> vals = h.getList(ent);
-				if(vals !=null){
-					for(int i=0;i<vals.size();i++){
-						putEnt(ent,vals.get(i));
-					}
-				}
-			}
+    }
 
-		}
-	}
+    /**
+     * Add all key-value pairs of a new HashCollection to this object
+     * @param newHash - target HashCollection
+     */
 
-	public void putList(K key, ArrayList<V> list){
-		for(int i=0;i<list.size();i++){
-			putEnt(key,list.get(i));
-		}
-	}
+    public void putAll(HashCollection<K,V> newHash){
+        Enumeration<K> e = newHash.keys();
+        while (e.hasMoreElements()) {
+            K key = e.nextElement();
+            ArrayList<V> values = newHash.getList(key);
+            for (V value : values) {
+                putEnt(key, value);
+            }
+        }
+    }
 
-	ArrayList<V> getList(K key){
-		ArrayList<V> k = hc.get(key);
-		if (k==null){
-			return(null);
-		}
-		else{
-			return(k);
-		}
-	}
+    public void putList(K key, ArrayList<V> list){
+        for (V aList : list) {
+            putEnt(key, aList);
+        }
+    }
 
-	int size(){
-		return(hc.size());
-	}
+    public ArrayList<V> getList(K key){
+        try {
+            return mHash.get(key);
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
 
-	void remove(K key){
-		hc.remove(key);
-	}
+    public int size(){
+        return(mHash.size());
+    }
 
-	void clear(){
-		for (Enumeration<K> e = hc.keys() ; e.hasMoreElements() ;) {
-			K ent = e.nextElement();
-			remove(ent);
-		}
-	}
+    public ArrayList<V> remove(K key){
+        return mHash.remove(key);
+    }
 
-	public boolean containsKey(K key){
-		return(hc.containsKey(key));
-	}
+    public void clear() {
+        for (Enumeration<K> e = mHash.keys() ; e.hasMoreElements() ;) {
+            K ent = e.nextElement();
+            remove(ent);
+        }
+    }
 
-	ArrayList<V> get(K key){
-		return(hc.get(key));
-	}
+    public boolean containsKey(K key){
+        return(mHash.containsKey(key));
+    }
 
-	public Enumeration<K> keys(){
-		return(hc.keys());
-	}
+    public ArrayList<V> get(K key){
+        return(mHash.get(key));
+    }
 
-
+    public Enumeration<K> keys(){
+        return(mHash.keys());
+    }
 }

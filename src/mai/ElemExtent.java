@@ -1,11 +1,10 @@
-
 /*
- * MAI - Multi-document Adjudication Interface
- * 
+ * This file is part of MAE - Multi-purpose Annotation Environment
+ *
  * Copyright Amber Stubbs (astubbs@cs.brandeis.edu)
  * Department of Computer Science, Brandeis University
- * 
- * MAI is free software: you can redistribute it and/or modify
+ *
+ * MAE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -17,60 +16,74 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package mai;
 
+
 /**
- * Extents Elem to provid information about tags that are 
- * used to label extents in a text (as well as non-consuming
+ * Extents Elem to provid information about tags that are
+ * used to label extents in a text (as well as non-conumsing
  * tags).
- * 
+ *
  * @author Amber Stubbs
+ * @revised Keigh Rim
  *
  */
 
+
 class ElemExtent extends Elem{
 
+    // mod by krim: start, end --> spans
+    private String mSpans;
 
-	ElemExtent(String name, String pre){
-		setName(name);
-		//extent tags always have id, start, and end
-		AttID id = new AttID("id", pre, true);
-		AttData start = new AttData("start", true);
-		AttData end = new AttData("end", true);
-		AttData text = new AttData("text", false);
-		addAttribute(id);
-		addAttribute(start);
-		addAttribute(end);
-		addAttribute(text);
-	}
-
-	public void setStart(int s){
-		start=s;
-	}
-
-	public int getStart(){
-		return start;
-	}
-
-	public void setEnd(int e){
-		end=e;
-	}
-
-	public int getEnd(){
-		return end;
-	}
+    ElemExtent(String name, String pre){
+        setName(name);
+        //extent tags always have id, start, and end
+        AttID id = new AttID("id", pre, true);
+        addAttribute(id);
 
 
-	public void printInfo(){
-		System.out.println("\tname = " + getName());
-		System.out.println("\tStart = " + getStart());
-		System.out.println("\tEnd = " + getEnd());
+        // mod by krim: start, end --> spans
+        AttData spans = new AttData("spans", true);
+        addAttribute(spans);
 
-	}
+        AttData text = new AttData("text", false);
+        addAttribute(text);
+    }
 
-	private int start;
-	private int end;
+    /* mod by krim: these setters and getters are no longer used
+    public void setStart(int s) {
+        start = s;
+    }
+
+    public int getStart(){
+        return start;
+    }
+
+    public void setEnd(int e){
+        end=e;
+    }
+
+    public int getEnd(){
+        return end;
+    }
+    */
+
+    public void setSpans(String spans) {
+        this.mSpans = spans;
+    }
+
+    public String getSpans() {
+        return mSpans;
+    }
+
+    public void printInfo(){
+        System.out.println("\tname = " + getName());
+
+        // mod by krim: start, end --> spans
+        System.out.println("\tspans = " + getSpans());
+    }
 }
+

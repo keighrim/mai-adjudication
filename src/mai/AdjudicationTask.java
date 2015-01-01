@@ -33,433 +33,462 @@ import java.util.*;
  * catching for the methods in AdjudDB.
  * 
  * @author Amber Stubbs 
- * @version 0.7 April 19, 2012
+ * @revised Keigh Rim
  */
 
 
 class AdjudicationTask {
 
-	private Hashtable<String,Elem> elements;
-	private Hashtable<String,AttID> idTracker;
+    private Hashtable<String,Elem> mElements;
+    private Hashtable<String,AttID> mIdTracker;
 
-	private AdjudDB tagTable;
-	private DTD dtd;
-	private boolean hasDTD;
+    private AdjudDB mDB;
+    private DTD mDtd;
+    private boolean hasDTD;
 
-	/**
-	 * Creates a new AdjudicationTask object and accompanying database
-	 */
-	AdjudicationTask(){
-		tagTable = new AdjudDB();
-		hasDTD = false;
-	}
+    /**
+     * Creates a new AdjudicationTask object and accompanying database
+     */
+    AdjudicationTask() {
+        mDB = new AdjudDB();
+        hasDTD = false;
+    }
 
-	/**
-	 * resets the database
-	 */
-	void reset_db(){
-		tagTable.close_db();
-		tagTable = new AdjudDB();
-	}
+    /**
+     * resets the database
+     */
+    void reset_db() {
+        mDB.closeDb();
+        mDB = new AdjudDB();
+    }
 
-	/**
-	 * Clears the idTracker hashtable
-	 */
-	void reset_IDTracker(){
-		idTracker = createIDTracker();
-	}
+    /**
+     * Clears the mIdTracker hashtable
+     */
+    void reset_IDTracker() {
+        mIdTracker = createIDTracker();
+    }
 
-	/**
-	 * Calls the DB to create all the necessary tables
-	 */
-	void addDTDtoDB(){
-		tagTable.addDTD(dtd);
-	}
+    /**
+     * Calls the DB to create all the necessary tables
+     */
+    void addDTDtoDB() {
+        mDB.addDTD(mDtd);
+    }
 
-	/**
-	 * 
-	 * @param fullName
-	 * @param newTags
-	 */
-	void addTagsFromHash(String fullName, 
-			HashCollection<String,Hashtable<String,String>> newTags){
-		tagTable.addTagsFromHash(fullName, dtd, newTags);
+    void addTagsFromHash(String fullName,
+            HashCollection<String,Hashtable<String,String>> newTags) {
+        mDB.addTagsFromHash(fullName, mDtd, newTags);
+    }
 
-	}
-	/**
-	 * called when a goldStandard file is added to the task
-	 */
-	void findAllOverlaps(){
-		try{
-			tagTable.findAllOverlaps();
-		}
-		catch(Exception e){
-			System.out.println("help, error finding extent overlaps!");
-			System.out.println(e.toString());
-		}
+    /**
+     * called when a goldStandard file is added to the task
+     */
+    void findAllOverlaps() {
+        try{
+            mDB.findAllOverlaps();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+            System.out.println("help, error finding extent overlaps!");
+        }
+    }
 
-
-	}
-
-	/**
-	 * Adds a tag (with information about attribute values in a Hashtable)
-	 * to the database
-	 * 
-	 * @param fullName name of the file the tag is from
-	 * @param e the type of Elem (tag) being added
-	 * @param tag Hashtable with information about the tag
-	 */
-	void addTagFromHash(String fullName,Elem e, Hashtable<String,String> tag){
-		if (e instanceof ElemExtent){
-			tagTable.usePreparedExtentStatements(fullName, e,tag);
-			try{
-				tagTable.batchExtents();
-			}catch(Exception ex){
-				System.out.println("help, error in batch extents!");
-				System.out.println(ex.toString());
-			}
-			try{
-				tagTable.batchElement(e);
-			}catch(Exception ex){
-				System.out.println("help, error in batchelement extent!");
-				System.out.println(ex.toString());
-			}
-			//also, check for overlaps and add them to the extent_overlaps table
-			if(fullName.equals("goldStandard.xml")){
-				try{
-					tagTable.add_overlaps(fullName,e,tag);
-				}catch(Exception exe){
-					System.out.println("help, error in finding extent overlaps!");
-					System.out.println(exe.toString());
-				}
-			}
-		}
-		else if (e instanceof ElemLink){
-			tagTable.usePreparedLinkStatements(fullName, e, tag);
-			try{
-				tagTable.batchLinks();
-			}catch(Exception ex){
-				System.out.println("help, error in batchLinks link!");
-				System.out.println(ex.toString());
-			}
-			try{
-				tagTable.batchElement(e);
-			}catch(Exception ex){
-				System.out.println("help, error in batchElement link!");
-				System.out.println(ex.toString());
-			}
-		}
-		else{
-			System.out.println("error!  element type not found");
-		}
-	}
+    /**
+     * Adds a tag (with information about attribute values in a Hashtable)
+     * to the database
+     * 
+     * @param fileName name of the file the tag is from
+     * @param tag the type of Elem (tag) being added
+     * @param tagVals Hashtable with information about the tag
+     */
+    void addTagFromHash(String fileName,Elem tag, Hashtable<String,String> tagVals) {
+        if (tag instanceof ElemExtent) {
+            mDB.usePreparedExtentStatements(fileName, tag, tagVals);
+            try{
+                mDB.batchExtents();
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                System.out.println("help, error in batch extents!");
+            }
+            try{
+                mDB.batchElement(tag);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                System.out.println("help, error in batch element extent!");
+            }
+            //also, check for overlaps and add them to the extent_overlaps table
+            if(fileName.equals("goldStandard.xml")) {
+                try{
+                    mDB.addOverlaps(tag, tagVals);
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                    System.out.println("help, error in finding extent overlaps!");
+                }
+            }
+        }
+        else if (tag instanceof ElemLink) {
+            mDB.usePreparedLinkStatements(fileName, tag, tagVals);
+            try{
+                mDB.batchLinks();
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                System.out.println("help, error in batchLinks link!");
+            }
+            try{
+                mDB.batchElement(tag);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                System.out.println("help, error in batchElement link!");
+            }
+        }
+        else{
+            System.out.println("error!  element type not found");
+        }
+    }
 
 
-	/**
-	 * Creates the hastable of DTD Elements
-	 * @return
-	 */
-	private Hashtable<String,Elem> createHash(){
-		Hashtable<String,Elem> es=new Hashtable<String,Elem>();
-		ArrayList<Elem>elems = dtd.getElements();
-		for(int i=0;i<elems.size();i++){
-			es.put(elems.get(i).getName(),elems.get(i));
-		} 
-		return(es);
-	}
+    /**
+     * Creates the hastable of DTD Elements
+     * @return
+     */
+    private Hashtable<String,Elem> createHash() {
+        Hashtable<String,Elem> es=new Hashtable<String,Elem>();
+        ArrayList<Elem>elems = mDtd.getElements();
+        for(int i=0;i<elems.size();i++) {
+            es.put(elems.get(i).getName(),elems.get(i));
+        } 
+        return(es);
+    }
 
-	/**
-	 * The IDTracker hashtable keeps one ID for each element that
-	 * has an ID, and increments the number so that no two 
-	 * tags of the same type will have the same ID.  In MAI this 
-	 * is used only for the Gold Standard file (other files can't be edited and 
-	 * are assumed to already have only one tag per ID)
-	 * 
-	 * @return
-	 */
-	private Hashtable<String,AttID> createIDTracker(){
-		Hashtable<String,AttID> ids = new Hashtable<String,AttID>();
-		ArrayList<Elem>elems = dtd.getElements();
-		for(int i=0;i<elems.size();i++){
-			ArrayList<Attrib> attribs = elems.get(i).getAttributes();
-			for(int j=0;j<attribs.size();j++){
-				if (attribs.get(j) instanceof AttID){
-					AttID oldid = (AttID)attribs.get(j);
-					AttID id = new AttID(oldid.getName(),
-							oldid.getPrefix(),true);
-					id.setNumber(0);
-					ids.put(elems.get(i).getName(),id);
-				}
-			}
-		}        
-		return ids;
-	}
+    /**
+     * The IDTracker hashtable keeps one ID for each element that
+     * has an ID, and increments the number so that no two 
+     * tags of the same type will have the same ID.  In MAI this 
+     * is used only for the Gold Standard file (other files can't be edited and 
+     * are assumed to already have only one tag per ID)
+     * 
+     * @return
+     */
+    private Hashtable<String,AttID> createIDTracker() {
+        Hashtable<String,AttID> ids = new Hashtable<String,AttID>();
+        ArrayList<Elem>elems = mDtd.getElements();
+        for (Elem elem : elems) {
+            ArrayList<Attrib> attribs = elem.getAttributes();
+            for (Attrib attrib : attribs) {
+                if (attrib instanceof AttID) {
+                    AttID oldid = (AttID) attrib;
+                    AttID id = new AttID(oldid.getName(),
+                            oldid.getPrefix(), true);
+                    id.setNumber(0);
+                    ids.put(elem.getName(), id);
+                }
+            }
+        }        
+        return ids;
+    }
 
-	/**
-	 * Finds the next available ID for an element and returns it.
-	 * 
-	 * @param element tag type
-	 * @param fileName name of the file the ID is for
-	 * @return the next ID for that element
-	 */
-	String getNextID(String element,String fileName){
-		AttID id = idTracker.get(element);
-		String nextid = id.getID();
-		id.incrementNumber();
-		//check to see if nextid is already in db
-		//this will catch cases where two tags have
-		//the same prefix
-		try{
-			while(tagTable.idExists(nextid,fileName)){
-				nextid = id.getID();
-				id.incrementNumber();
-			}
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-		return nextid;
+    /**
+     * Finds the next available ID for an element and returns it.
+     * 
+     * @param element tag type
+     * @param fileName name of the file the ID is for
+     * @return the next ID for that element
+     */
+    String getNextID(String element,String fileName) {
+        AttID id = mIdTracker.get(element);
+        String nextid = id.getID();
+        id.incrementNumber();
+        //check to see if nextid is already in db
+        //this will catch cases where two tags have
+        //the same prefix
+        try{
+            while(mDB.idExists(nextid,fileName)) {
+                nextid = id.getID();
+                id.incrementNumber();
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return nextid;
+    }
 
-	}
+    HashCollection<String,String> getExtentAllLocs(String tagname) {
+        try{
+            return(mDB.getExtentAllLocs(tagname));
+        } catch(Exception e) {
+            e.printStackTrace();
+            return (new HashCollection<String,String>());
+        }
+    }
 
+    ArrayList<String> getFilesAtLocbyElement(String elem, int loc) {
+        try{
+            return mDB.getFilesAtLocbyElement(elem,loc);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	HashCollection<String,String> getExtentAllLocs(String tagname){
-		try{
-			return(tagTable.getExtentAllLocs(tagname));
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-		return (new HashCollection<String,String>());
+    ArrayList<String> getExtentTagsByFileAndType(String file, Elem elem) {
+        try{
+            return mDB.getExtentTagsByFileAndType(file,elem);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	}
+    ArrayList<String> getLinkTagsByFileAndType(String file, Elem elem) {
+        try{
+            return mDB.getLinkTagsByFileAndType(file,elem);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	ArrayList<String> getFilesAtLocbyElement(String elem, int loc){
-		try{
-			ArrayList<String>files = tagTable.getFilesAtLocbyElement(elem,loc);
-			return files;
-		}catch(Exception e){
-			System.out.println(e.toString());
-			return null;
-		}
-	}
+    String getTextByFileElemAndID(String file, String elem, String id) {
+        try{
+            return mDB.getTextByFileElemAndID(file,elem,id);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 
-	ArrayList<String> getExtentTagsByFileAndType(String file, Elem elem){
-		try{
-			ArrayList<String>tags = tagTable.getExtentTagsByFileAndType(file,elem);
-			return tags;
-		}catch(Exception e){
-			System.out.println(e.toString());
-			return null;
-		}
-	}
+    Hashtable<String,String> getAllExtentsByFile(String file) {
+        try{
+            return mDB.getAllExtentsByFile(file);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return new Hashtable<String,String>();
+        }
+    }
 
-	ArrayList<String> getLinkTagsByFileAndType(String file, Elem elem){
-		try{
-			ArrayList<String>tags = tagTable.getLinkTagsByFileAndType(file,elem);
-			return tags;
-		}catch(Exception e){
-			System.out.println(e.toString());
-			return null;
-		}
-	}
-
-	String getTextByFileElemAndID(String file, String elem, String id){
-		String text = "";
-		try{
-			text = tagTable.getTextByFileElemAndID(file,elem,id);
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-		return text;
-	}
-
-	Hashtable<String,String> getAllExtentsByFile(String file){
-		Hashtable<String,String> allExtents = new Hashtable<String,String>();
-		try{
-			allExtents = tagTable.getAllExtentsByFile(file);
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-		return allExtents;
-	}
-
-	boolean tagExistsInFileAtLoc(String file, int loc){
-		try{
-			return tagTable.tagExistsInFileAtLoc(file,loc);
-		}catch(Exception e){
-			System.out.println("help!");
-			System.out.println(e.toString());
-			return false;
-		}
-	}
+    boolean tagExistsInFileAtLoc(String file, int loc) {
+        try{
+            return mDB.tagExistsInFileAtLoc(file,loc);
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println("help!");
+            return false;
+        }
+    }
 
 
-	Hashtable<String,String> getTagsByFileAndID(String tagname,
-			String id, String filename){
-		try{
-			ArrayList<Attrib> atts = dtd.getElem(tagname).getAttributes();
-			return tagTable.getTagsByFileAndID(tagname,id,filename,atts);
-		}catch(Exception e){
-			System.out.println(e.toString());
-			return null;
-		}
-	}
+    Hashtable<String,String> getTagsByFileAndID(
+            String tagName, String id, String fileName) {
+        try{
+            ArrayList<Attrib> atts = mDtd.getElem(tagName).getAttributes();
+            return mDB.getTagsByFileAndID(tagName, id, fileName, atts);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	String getLocByFileAndID(String file, String id){  
-		try{
-			String loc = tagTable.getLocByFileAndID(file,id);
-			return loc;
-		}catch(Exception e){
-			System.out.println(e.toString());
-			return null;
-		}
-	}
+    String getLocByFileAndID(String file, String id) {  
+        try{
+            return mDB.getLocByFileAndID(file,id);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	HashCollection<String,String>findGoldStandardLinksByType(String tagname){
-		try{
-			HashCollection<String,String> gslinks = tagTable.getGSLinksByType(tagname);
-			return gslinks;
-		}catch(Exception e){
-			System.out.println(e);
-		}
-		return new HashCollection<String,String>();
+    HashCollection<String,String>findGoldStandardLinksByType(String tagname) {
+        try{
+            return mDB.getGSLinksByType(tagname);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return new HashCollection<String,String>();
 
-	}
+    }
 
-	void removeExtentByFileAndID(String fullName,String e_name,String id){
-		try{
-			tagTable.removeExtentTags(fullName,e_name,id);
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-	}
+    void removeExtentByFileAndID(String fullName,String e_name,String id) {
+        try{
+            mDB.removeExtentTags(fullName, e_name, id);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	void removeLinkByFileAndID(String fullName,String e_name,String id){
-		try{
-			tagTable.removeLinkTags(fullName,e_name,id);
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-	}
+    void removeLinkByFileAndID(String fullName,String e_name,String id) {
+        try{
+            mDB.removeLinkTags(fullName, e_name, id);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    HashCollection<String,String> getLinksByFileAndExtentID(String file,String e_name,String id) {
+        try{
+            return(mDB.getLinksByFileAndExtentID(file,e_name,id));
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return (new HashCollection<String,String>());
+    }
 
-	HashCollection<String,String> getLinksByFileAndExtentID(String file,String e_name,String id){
-		try{
-			return(tagTable.getLinksByFileAndExtentID(file,e_name,id));
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-		return (new HashCollection<String,String>());
-	}
+    /**
+     * Sets the DTD for the Adjudication Task so 
+     * information about the files being adjudicated 
+     * are easily available.
+     * 
+     * @param d the object describing the task's DTD
+     */
+    public void setDTD(DTD d) {
+        mDtd =d;
+        mElements = createHash();
+        mIdTracker = createIDTracker();
+        hasDTD=true;
+    }
 
-	/**
-	 * Sets the DTD for the Adjudication Task so 
-	 * information about the files being adjudicated 
-	 * are easily available.
-	 * 
-	 * @param d the object describing the task's DTD
-	 */
-	public void setDTD(DTD d){
-		dtd=d;
-		elements = createHash();
-		idTracker = createIDTracker();
-		hasDTD=true;
-	}
-
-	/**
-	 * Returns all the Elem objects in the DTD
-	 * 
-	 * @return
-	 */
-	public ArrayList<Elem> getElements(){
-		return dtd.getElements();
-	}
+    /**
+     * Returns all the Elem objects in the DTD
+     * 
+     * @return
+     */
+    public ArrayList<Elem> getElements() {
+        return mDtd.getElements();
+    }
 
 
+    /**
+     * Get all tags of a specific type from given spans of text
+     * Added by krim: support multi-span mode
+     *
+     * @param spans - a list of text spans (start-end pairs)
+     * @param tagName - a name of tag type
+     * @return
+     */
+    HashCollection<String,String> getTagsWithinSpansByType(ArrayList<int[]> spans,
+                                                           String tagName) {
+        HashCollection<String, String> tagsAndAtts = new HashCollection<String, String>();
+        for (int[] span : spans) {
+            tagsAndAtts.putAll(getTagsSpanByType(span[0], span[1], tagName));
+        }
+        return tagsAndAtts;
+    }
 
-	HashCollection<String,String> getTagsSpanByType(int begin, int end, 
-			String tag){
-		try{
-			return (tagTable.getTagsInSpanByType(begin,end,tag));
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-		return null;
-	}
+    /**
+     * Get all tags of a specific type which is non-consuming or from given spans of text
+     * Added by krim: support multi-span mode
+     *
+     * @param file - an annotation file name
+     * @param spans - a list of text spans (start-end pairs)
+     * @return
+     */
+    HashCollection<String,String> getFileTagsSpanAndNC(String file, ArrayList<int[]> spans) {
+        HashCollection<String, String> tagsAndAttsWithNC = new HashCollection<String, String>();
+        for (int[] span : spans) {
+            tagsAndAttsWithNC.putAll(getFileTagsSpanAndNC(file, span[0], span[1]));
+        }
+        return tagsAndAttsWithNC;
+    }
 
-	HashCollection<String,Hashtable<String,String>> getLinkTagsSpanByType
-	   (int begin, int end, String tagname){
-		try{
-			ArrayList<Attrib> atts = dtd.getElem(tagname).getAttributes();
-			return (tagTable.getLinkTagsInSpanByType(begin,end,tagname,atts));
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-		return null;
+    /**
+     * Get all link tags of a specific type from given spans of text
+     * Added by krim: support multi-span mode
+     *
+     * @param spans - a list of text spans (start-end pairs)
+     * @param tagName - a name of tag type
+     * @return
+     */
+    HashCollection<String,Hashtable<String,String>> getLinkTagsSpanByType
+       (ArrayList<int[]> spans, String tagName) {
+        HashCollection<String, Hashtable<String, String>> linkTagsAndAtts = new HashCollection<String, Hashtable<String, String>>();
+        for (int[] span : spans) {
+            linkTagsAndAtts.putAll(getLinkTagsSpanByType(span[0], span[1], tagName));
+        }
+        return linkTagsAndAtts;
+    }
 
-	}
+    HashCollection<String,String> getTagsSpanByType(int begin, int end, 
+            String tag) {
+        try{
+            return (mDB.getTagsInSpanByType(begin,end,tag));
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    HashCollection<String,Hashtable<String,String>> getLinkTagsSpanByType
+       (int begin, int end, String tagname) {
+        try{
+            ArrayList<Attrib> atts = mDtd.getElem(tagname).getAttributes();
+            return (mDB.getLinkTagsInSpanByType(begin,end,tagname,atts));
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+    HashCollection<String,String> getFileTagsSpanAndNC(String file, int begin, int end) {
+        try{
+            return (mDB.getFileTagsInSpanAndNC(file, begin,end));
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
-	HashCollection<String,String> getFileTagsSpanAndNC(String file, int begin, int end){
-		try{
-			return (tagTable.getFileTagsInSpanAndNC(file, begin,end));
-		}catch(Exception e){
-			System.out.println(e.toString());
-		}
-		return null;
-	}
+    public HashCollection<String,int[]>getCurrentHighlights() {
+        return mDB.getCurrentHighlights();
+    }
 
+    public ArrayList<String> getExtentElements() {
+        ArrayList<String> extents = new ArrayList<String>();
+        ArrayList<Elem> elems = mDtd.getElements();
+        for(int i=0;i<elems.size();i++) {
+            Elem e = elems.get(i);
+            if(e instanceof ElemExtent) {
+                extents.add(e.getName());
+            }
+        }
+        return extents;
+    }
+    
+    /**
+     * Returns only non-consuming elements in the DTD
+     * 
+     * @return
+     */
+    public ArrayList<Elem> getNCElements() {
+        return mDtd.getNCElements();
+    }
 
-	public HashCollection<String,String>getCurrentHighlights(){
-		return tagTable.getCurrentHighlights();
-	}
+    public ArrayList<String> getLinkElements() {
+        ArrayList<String> links = new ArrayList<String>();
+        ArrayList<Elem> elems = mDtd.getElements();
+        for (Elem e : elems) {
+            if (e instanceof ElemLink) {
+                links.add(e.getName());
+            }
+        }
+        return links;
+    }
 
-	public ArrayList<String> getExtentElements(){
-		ArrayList<String> extents = new ArrayList<String>();
-		ArrayList<Elem> elems = dtd.getElements();
-		for(int i=0;i<elems.size();i++){
-			Elem e = elems.get(i);
-			if(e instanceof ElemExtent){
-				extents.add(e.getName());
-			}
-		}
-		return extents;
-	}
-	
-	/**
-	 * Returns only non-consuming elements in the DTD
-	 * 
-	 * @return
-	 */
-	public ArrayList<Elem> getNCElements(){
-		return dtd.getNCElements();
-	}
+    public Hashtable<String,Elem> getElemHash() {
+        return mElements;
+    }
 
-	public ArrayList<String> getLinkElements(){
-		ArrayList<String> links = new ArrayList<String>();
-		ArrayList<Elem> elems = dtd.getElements();
-		for(int i=0;i<elems.size();i++){
-			Elem e = elems.get(i);
-			if(e instanceof ElemLink){
-				links.add(e.getName());
-			}
-		}
-		return links;
-	}
+    Elem getElem(String name) {
+        return mElements.get(name);
+    }
 
-	public Hashtable<String,Elem> getElemHash(){
-		return elements;
-	}
+    boolean hasDTD() {
+        return hasDTD;
+    }
 
-	Elem getElem(String name){
-		return elements.get(name);
-	}
-
-	boolean hasDTD(){
-		return hasDTD;
-	}
-
-	public String getDTDName(){
-		return dtd.getName();
-	}
+    public String getDTDName() {
+        return mDtd.getName();
+    }
 
 }

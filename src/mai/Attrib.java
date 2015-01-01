@@ -58,10 +58,7 @@ public void setDefaultValue(String d){
 }
 
 public boolean hasDefaultValue(){
-    if (defaultValue.length()==0){
-        return false;
-     }
-     return true;
+    return defaultValue.length() != 0;
 }
 
 public void printInfo(){

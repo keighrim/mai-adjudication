@@ -31,50 +31,74 @@ import org.xml.sax.helpers.*;
  * the stand-off XML format used in MAE/MAI.
  * 
  * @author Amber Stubbs
+ * @revised Keigh Rim
  */
 
 class XMLHandler extends DefaultHandler {
-    private HashCollection<String,Hashtable<String,String>> newTags = new HashCollection<String,Hashtable<String,String>>();
-    private boolean text = false;
-    private String textChars="";
+    private HashCollection<String, Hashtable<String, String>> newTags
+            = new HashCollection<String, Hashtable<String, String>>();
+    private boolean mHasText = false;
+    private String mText = "";
 
-    XMLHandler (){
+    XMLHandler() {
     }
 
+    @Override
     public void startElement(String nsURI, String strippedName, String tagName, Attributes atts)
-       throws SAXException {
-           
-           if (tagName.equalsIgnoreCase("text")){
-               text = true;
-           }
-           Hashtable<String,String> tag = new Hashtable<String,String>();
-           for(int i=0;i<atts.getLength();i++){
-               String name = atts.getQName(i);
-               String value = atts.getValue(i);
-               tag.put(name,value);
-               newTags.putEnt(tagName,tag);
-           }
-    }
+            throws SAXException {
 
-    public void endElement(String nsURI, String localName, String tagName){
+        if (tagName.equalsIgnoreCase("text")) {
+            mHasText = true;
+        } else {
+            Hashtable<String, String> tag = new Hashtable<String, String>();
+            for (int i = 0; i < atts.getLength(); i++) {
+                String name = atts.getQName(i);
+                String value = atts.getValue(i);
+                tag.put(name, value);
+                // add by krim: for legacy support
+                convertLegXml(tag);
+                newTags.putEnt(tagName, tag);
+            }
         }
+    }
 
+    @Override
+    public void endElement(String nsURI, String localName, String tagName) {
+    }
 
+    @Override
     public void characters(char[] ch, int start, int length) {
-       if (text) {
-         textChars = new String(ch, start, length);
-         text = false;
-       }
+        if (mHasText) {
+            mText = new String(ch, start, length);
+            mHasText = false;
+        }
     }
 
 
+    HashCollection<String, Hashtable<String, String>> returnTagHash() {
+        return newTags;
+    }
 
-  HashCollection<String,Hashtable<String,String>> returnTagHash(){
-      return newTags;
-      }
+    public String getText() {
+        return mText;
+    }
 
-  public String getTextChars(){
-      return textChars;
-   }
+    /**
+     * add by krim:
+     * Used to convers start-end attributes for old version to new 'spans' attribute.
+     *
+     * @param tag a HashTable of (attribute, value) entities
+     */
 
+    private void convertLegXml(Hashtable<String, String> tag) {
+
+        if (!tag.containsKey("spans")) {
+            if (tag.containsKey("start") && tag.containsKey("end")) {
+                String start = tag.remove("start");
+                String end = tag.remove("end");
+                tag.put("spans", start + MaiMain.SPANDELIMITER + end);
+            }
+        }
+    }
 }
+
