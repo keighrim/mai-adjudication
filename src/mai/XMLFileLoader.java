@@ -28,7 +28,7 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
 /**
- * XMLFileLoader reads in any annotated files that are loaded into MAE by 
+ * XMLFileLoader reads in any annotated files that are loaded into MAI by
  * calling the XMLHandler file.
  * 
  * @author Amber Stubbs

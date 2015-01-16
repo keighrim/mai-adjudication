@@ -2281,7 +2281,7 @@ public class MaiMain extends JPanel{
     }
 
     /**
-     * Sets MAE mode to Normal
+     * Sets MAI mode to Normal
      * added by krim
      */
     private void returnToNormalMode() {

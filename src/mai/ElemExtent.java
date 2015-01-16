@@ -1,10 +1,10 @@
 /*
- * This file is part of MAE - Multi-purpose Annotation Environment
+ * MAI - Multi-document Adjudication Interface
  *
  * Copyright Amber Stubbs (astubbs@cs.brandeis.edu)
  * Department of Computer Science, Brandeis University
  *
- * MAE is free software: you can redistribute it and/or modify
+ * MAI is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
