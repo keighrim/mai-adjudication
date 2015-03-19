@@ -67,7 +67,7 @@ public class MaiMain extends JPanel{
 
     // added by krim: constant strings to be used in GUI title bar
     // krim: made the version number correspond to MAE
-    protected final static String VERSION = "0.10.0";
+    protected final static String VERSION = "0.10.0.1";
     protected final static String TITLE_PREFIX = "MAI " + VERSION;
 
     // added by krim: constant string to be used in string representation of mSpans
