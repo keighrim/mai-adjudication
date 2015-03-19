@@ -13,10 +13,10 @@ Currently Keigh Rim (krim@brandeis.edu) is working on maintenance jobs and updat
 ### Requirements
 Current version of MAI is written in JAVA. Thus, to run MAI on your local system, you need JAVA later than 6. Use JAR to run MAI
     
-    > java -jar mai_v0.10.0.jar
+    > java -jar mai.jar
 
 ### Changes
-See [CHANGELOG.md] (https://github.com/keighrim/mai-adjudication/blob/master/README.md)
+See [CHANGELOG.md] (https://github.com/keighrim/mai-adjudication/blob/master/CHANGELOG.md)
 
 ### License
 MAI is free software: you can redistribute it and/or modify it under the terms of the [GNU General Public License](http://www.gnu.org/licenses/gpl.html) as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.

@@ -1,3 +1,8 @@
+## 0.10.0.1
+* fixed java version issue
+* removed MAI 7 jar file
+* removed version suffix in main jar file
+
 ## 0.10.0
 * Added support for extent tags with multiple/discontinuous spans
 
