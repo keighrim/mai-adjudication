@@ -427,7 +427,7 @@ class AdjudDB {
             String fileName, Elem elem) throws Exception{
         Statement stat = mConn.createStatement();
         String query = ("select * from "+elem.getName()+ " where file_name = '" +
-                fileName + "' order by start;");
+                fileName + "' order by spans;");
         ResultSet rs = stat.executeQuery(query);
         ArrayList<String> tags = makeTagStringsForOutput(rs, elem);
         rs.close();

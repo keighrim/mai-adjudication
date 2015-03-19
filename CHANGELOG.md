@@ -1,3 +1,6 @@
+## 0.10.0.2
+* fixed: 'save gold standard' was not working
+
 ## 0.10.0.1
 * fixed java version issue
 * removed MAI 7 jar file
