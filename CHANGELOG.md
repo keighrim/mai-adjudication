@@ -1,3 +1,6 @@
+## 0.10.0.3
+* fixed: added version number to window title when no file is loaded
+
 ## 0.10.0.2
 * fixed: 'save gold standard' was not working
 
